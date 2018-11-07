@@ -13,6 +13,6 @@ namespace Contract
         [OperationContract]
         void TestCommunication();
         [OperationContract]
-        void SendMessage(string msg, byte[] sign);
+        void SendMessage(string msg);
     }
 }

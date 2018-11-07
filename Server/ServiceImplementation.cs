@@ -2,16 +2,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Server
 {
     public class ServiceImplementation : IWCFContracts
     {
-        public void SendMessage(string msg, byte[] sign)
+        public void SendMessage(string msg)
         {
-            throw new NotImplementedException();
+            //get principal
+            //cert
+            //Console.WriteLine(.AuthenticationType);
+            IIdentity id = Thread.CurrentPrincipal.Identity; //cast as identity and get certificate
+            //WindowsPrincipal.Current.
+            //Console.WriteLine("Auth type {0}, Name {1}", id.AuthenticationType, id.Name); 
         }
 
         public void TestCommunication()

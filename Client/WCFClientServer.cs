@@ -26,11 +26,11 @@ namespace Client
             proxy = this.CreateChannel();
         }
 
-        public void SendMessage(string msg, byte[] sign)
+        public void SendMessage(string msg)
         {
             try
             {
-                proxy.SendMessage(msg, sign);
+                proxy.SendMessage(msg);
             }
             catch (Exception e)
             {

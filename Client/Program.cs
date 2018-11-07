@@ -24,7 +24,7 @@ namespace Client
             // X509Certificate2 clientCert = CertManager.GetCertificateFromFile(filename);
 
             //gets server certificate
-            X509Certificate2 servCert = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, "user2");
+            X509Certificate2 servCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, "User2");
             EndpointAddress addressServer = new EndpointAddress(new Uri("net.tcp://localhost:10000/WCFContracts"), new X509CertificateEndpointIdentity(servCert));
 
             using (WCFClientServer proxy = new WCFClientServer(bindingServer, addressServer))
@@ -32,6 +32,7 @@ namespace Client
                 proxy.TestCommunication();
                 Console.WriteLine("TestCommunication() finished. Press <enter> to continue ...");
                 Console.ReadLine();
+                proxy.SendMessage("poruka");
             }
         }
 

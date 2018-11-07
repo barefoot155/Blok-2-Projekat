@@ -50,7 +50,13 @@ namespace Contract
             /// Check whether the subjectName of the certificate is exactly the same as the given "subjectName"
             foreach (X509Certificate2 c in certCollection)
             {
-                if (c.SubjectName.Name.Equals(string.Format("CN={0}", subjectName)))
+                string CN = "";
+                if (c.SubjectName.Name.Contains(','))
+                {
+                    CN = c.SubjectName.Name.Split(',')[0];
+                }
+                
+                if (CN.Equals(string.Format("CN={0}", subjectName)))
                 {
                     return c;
                 }
