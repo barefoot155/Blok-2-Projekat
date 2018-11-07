@@ -14,5 +14,7 @@ namespace Contract
         void TestCommunication();
         [OperationContract]
         void SendMessage(string msg);
+        [OperationContract]
+        void PingServer(DateTime dt);
     }
 }

@@ -15,18 +15,35 @@ namespace Server
 {
     public class ServiceImplementation : IWCFContracts
     {
+        /// <summary>
+        /// Test metoda, ne koristi se u projektu
+        /// </summary>
+        /// <param name="msg"></param>
         public void SendMessage(string msg)
         {
             if (!isClientAuthorized())
                 throw new SecurityException("Access denied");
 
             Console.WriteLine("Client sent msg: {0}", msg);
+        }
 
-            //log to file
+        /// <summary>
+        /// Called every 1-10s
+        /// </summary>
+        /// <param name="dt"></param>
+        public void PingServer(DateTime dt)
+        {
+            if (!isClientAuthorized())
+                throw new SecurityException("Access denied");
+
+            X509Certificate2 clientCert = getClientCertificate();
+            int commaIndex = clientCert.SubjectName.Name.IndexOf(',');
+            string commonName = clientCert.SubjectName.Name.Remove(commaIndex); //delete everything after comma -> leave only CN="username"
+            Logger.LogData(dt, commonName);
         }
 
         public void TestCommunication()
-        {            
+        {
             Console.WriteLine("Communication is established...");
         }
 
@@ -34,8 +51,7 @@ namespace Server
         {
             try
             {
-                X509Certificate2 clientCert = ((X509CertificateClaimSet)
-                    OperationContext.Current.ServiceSecurityContext.AuthorizationContext.ClaimSets[0]).X509Certificate; //gets client certificate from connection
+                X509Certificate2 clientCert = getClientCertificate(); 
 
                 string subjectName = clientCert.SubjectName.Name;
 
@@ -50,11 +66,21 @@ namespace Server
 
                 return false;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Gets client certificate from established connection
+        /// </summary>
+        /// <returns></returns>
+        private X509Certificate2 getClientCertificate()
+        {
+            return ((X509CertificateClaimSet)
+                    OperationContext.Current.ServiceSecurityContext.AuthorizationContext.ClaimSets[0]).X509Certificate;
         }
     }
 }

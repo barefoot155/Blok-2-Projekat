@@ -13,22 +13,19 @@ namespace CertificateServiceManager
     {
         static void Main(string[] args)
         {
-            //string root = "TestCA";
-
             NetTcpBinding binding = new NetTcpBinding();
             InitializeWindowsAuthentication(binding);
 
             ServiceHost host = new ServiceHost(typeof(CertificateManager));
             if (ServerHosting(host, binding))
             {
-                Console.WriteLine("WCFService is started.\nPress <enter> to stop ...");
+                Console.WriteLine("WCFService is started...");
                 RootCert rc = new RootCert();
-                Console.WriteLine("Enter root name to create: ");
+                Console.WriteLine("Enter root name: ");
                 string root = Console.ReadLine();
                 rc.createRootCertificate(root);
+                Console.WriteLine("Press <enter> to close server...");                
             }
-
-            
 
             Console.ReadLine();
 

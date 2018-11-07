@@ -26,6 +26,18 @@ namespace Client
             proxy = this.CreateChannel();
         }
 
+        public void PingServer(DateTime dt)
+        {
+            try
+            {
+                proxy.PingServer(dt);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception: " + e.Message);
+            }
+        }
+
         public void SendMessage(string msg)
         {
             try
