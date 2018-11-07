@@ -31,9 +31,12 @@ namespace Client
             {
                 proxy.TestCommunication();
                 Console.WriteLine("TestCommunication() finished. Press <enter> to continue ...");
-                Console.ReadLine();
-                proxy.SendMessage("poruka");
+                Console.WriteLine("Send message to server: ");
+                string msg = Console.ReadLine();
+                proxy.SendMessage(msg);
             }
+
+            Console.ReadLine();
         }
 
         public static void InitializeWindowsAuthentication(NetTcpBinding binding)

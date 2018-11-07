@@ -1,8 +1,12 @@
 ﻿using Contract;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Claims;
 using System.Linq;
+using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.ServiceModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,20 +17,44 @@ namespace Server
     {
         public void SendMessage(string msg)
         {
-            //get principal
-            //cert
-            //Console.WriteLine(.AuthenticationType);
-            IIdentity id = Thread.CurrentPrincipal.Identity; //cast as identity and get certificate
-            //WindowsPrincipal.Current.
-            //Console.WriteLine("Auth type {0}, Name {1}", id.AuthenticationType, id.Name); 
+            if (!isClientAuthorized())
+                throw new SecurityException("Access denied");
+
+            Console.WriteLine("Client sent msg: {0}", msg);
+
+            //log to file
         }
 
         public void TestCommunication()
-        {
-            //string clientName = Thread.CurrentPrincipal.Identity.Name.Split('\\')[1];
-            //host.Credentials.ClientCertificate.Certificate = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, clientName);
-
+        {            
             Console.WriteLine("Communication is established...");
+        }
+
+        private bool isClientAuthorized()
+        {
+            try
+            {
+                X509Certificate2 clientCert = ((X509CertificateClaimSet)
+                    OperationContext.Current.ServiceSecurityContext.AuthorizationContext.ClaimSets[0]).X509Certificate; //gets client certificate from connection
+
+                string subjectName = clientCert.SubjectName.Name;
+
+                if (subjectName.Contains("RegionWest"))
+                    return true;
+                if (subjectName.Contains("RegionEast"))
+                    return true;
+                if (subjectName.Contains("RegionNorth"))
+                    return true;
+                if (subjectName.Contains("RegionSouth"))
+                    return true;
+
+                return false;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
         }
     }
 }
