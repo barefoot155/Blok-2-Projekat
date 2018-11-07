@@ -13,7 +13,7 @@ namespace CertificateServiceManager
     {
         static void Main(string[] args)
         {
-            string root = "TestCA";
+            //string root = "TestCA";
 
             NetTcpBinding binding = new NetTcpBinding();
             InitializeWindowsAuthentication(binding);
@@ -23,6 +23,8 @@ namespace CertificateServiceManager
             {
                 Console.WriteLine("WCFService is started.\nPress <enter> to stop ...");
                 RootCert rc = new RootCert();
+                Console.WriteLine("Enter root name to create: ");
+                string root = Console.ReadLine();
                 rc.createRootCertificate(root);
             }
 

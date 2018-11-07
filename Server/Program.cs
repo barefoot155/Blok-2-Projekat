@@ -45,7 +45,6 @@ namespace Server
 
         public static void Prompt()
         {
-            string root = "TestCA";
             NetTcpBinding binding = new NetTcpBinding();
             InitializeWindowsAuthentication(binding);
             EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
@@ -63,6 +62,8 @@ namespace Server
                     switch (option)
                     {
                         case 1:
+                            Console.WriteLine("Choose root: ");
+                            string root = Console.ReadLine();
                             proxy.GenerateCertificate(root);
                             break;
                         case 2:
