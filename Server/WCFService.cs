@@ -9,6 +9,7 @@ using System.Security.Principal;
 using System.ServiceModel.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
+using System.ServiceModel.Description;
 
 namespace Server
 {
@@ -22,6 +23,7 @@ namespace Server
 
             string address = "net.tcp://localhost:10000/WCFContracts";
             host = new ServiceHost(typeof(ServiceImplementation));
+            SpecifyAuditingBehavior(host);
             host.AddServiceEndpoint(typeof(IWCFContracts), binding, address);
 
             host.Credentials.ClientCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.ChainTrust;
@@ -36,8 +38,16 @@ namespace Server
 
             //
             
-        }   
-        
+        }
+
+        public void SpecifyAuditingBehavior(ServiceHost host)
+        {
+            ServiceSecurityAuditBehavior audit = new ServiceSecurityAuditBehavior();
+            audit.AuditLogLocation = AuditLogLocation.Application;
+            host.Description.Behaviors.Remove<ServiceSecurityAuditBehavior>();
+            host.Description.Behaviors.Add(audit);
+        }
+
         public void OpenServer()
         {
             host.Open();

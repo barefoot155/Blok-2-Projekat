@@ -1,6 +1,7 @@
 ﻿using Contract;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IdentityModel.Claims;
 using System.Linq;
 using System.Security;
@@ -15,6 +16,24 @@ namespace Server
 {
     public class ServiceImplementation : IWCFContracts
     {
+        private EventLog connectionEvent = new EventLog();
+        private string message = string.Empty;
+
+        public ServiceImplementation()
+        {
+            if (!EventLog.SourceExists("ConnectionEvents"))
+            {
+                EventLog.CreateEventSource("ConnectionEvents", "ConnectionLog");
+            }
+
+            connectionEvent.Source = "ConnectionEvents";
+            connectionEvent.Log = "ConnectionLog";
+
+            message = String.Format("Client {0} established connection with server.", ServiceSecurityContext.Current.PrimaryIdentity.Name);
+            EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
+
+            connectionEvent.WriteEntry(message, evntType);
+        }
         /// <summary>
         /// Test metoda, ne koristi se u projektu
         /// </summary>

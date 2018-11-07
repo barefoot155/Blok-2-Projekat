@@ -17,6 +17,7 @@ namespace CertificateServiceManager
             InitializeWindowsAuthentication(binding);
 
             ServiceHost host = new ServiceHost(typeof(CertificateManager));
+            SpecifyAuditingBehavior(host);
             if (ServerHosting(host, binding))
             {
                 Console.WriteLine("WCFService is started...");
@@ -58,6 +59,14 @@ namespace CertificateServiceManager
                 Console.WriteLine("[StackTrace] {0}", e.StackTrace);
                 return false;
             }  
+        }
+
+        public static void SpecifyAuditingBehavior(ServiceHost host)
+        {
+            ServiceSecurityAuditBehavior audit = new ServiceSecurityAuditBehavior();
+            audit.AuditLogLocation = AuditLogLocation.Application;
+            host.Description.Behaviors.Remove<ServiceSecurityAuditBehavior>();
+            host.Description.Behaviors.Add(audit);
         }
     }
 }
