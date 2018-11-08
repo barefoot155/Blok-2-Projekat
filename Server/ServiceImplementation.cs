@@ -45,8 +45,7 @@ namespace Server
                 throw new SecurityException("Access denied");
 
             X509Certificate2 clientCert = getClientCertificate();
-            int commaIndex = clientCert.SubjectName.Name.IndexOf(',');
-            string commonName = clientCert.SubjectName.Name.Remove(commaIndex); //delete everything after comma -> leave only CN="username"
+            string commonName = Helper.ExtractCommonNameFromCertificate(clientCert);
             Logger.LogData(dt, commonName);
         }
 

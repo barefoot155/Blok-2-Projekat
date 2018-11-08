@@ -24,9 +24,9 @@ namespace Server
            return proxy.GenerateCertificate(root);
         }
 
-        public void RevokeCertificate()
+        public void RevokeCertificate(X509Certificate2 certificate)
         {
-            throw new NotImplementedException();
+            proxy.RevokeCertificate(certificate);
         }
 
         public void SendMessage(string msg, byte[] sign)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,5 +24,20 @@ namespace Contract
             p.WaitForExit();
             p.Dispose();
         }
+
+        /// <summary>
+        /// Delete everything after comma -> leave only CN="username"
+        /// </summary>
+        /// <param name="clientCert"></param>
+        /// <returns></returns>
+        public static string ExtractCommonNameFromCertificate(X509Certificate2 clientCert)
+        {
+            int commaIndex = clientCert.SubjectName.Name.IndexOf(',');
+            string commonName = clientCert.SubjectName.Name.Remove(commaIndex); //CN=username
+
+            return commonName.Substring(3); //username
+        }
+
+        
     }
 }

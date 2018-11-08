@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.ServiceModel;
 using System.Text;
@@ -33,6 +34,7 @@ namespace Server
                 Console.WriteLine("1. Generate Certificate from CA");
                 Console.WriteLine("2. Add rights to certificate");
                 Console.WriteLine("3. Host Server with certificate AUTH");
+                Console.WriteLine("4. Revoke certificate");
                 Console.WriteLine("0. EXIT");
                 option = int.Parse(Console.ReadLine());
 
@@ -46,6 +48,9 @@ namespace Server
                         break;
                     case 3:
                         HostServer();
+                        break;
+                    case 4:
+                        RevokeCertificate();
                         break;
                     case 0: //exit program
                         break;
@@ -94,6 +99,30 @@ namespace Server
             finally
             {
                 host.CloseServer();
+            }
+        }
+
+        private static void RevokeCertificate()
+        {
+            try
+            {
+                string myName = WindowsIdentity.GetCurrent().Name.Split('\\')[1];
+                X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, myName);
+
+                NetTcpBinding binding = new NetTcpBinding();
+                InitializeWindowsAuthentication(binding);
+                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
+                using (WCFClient proxy = new WCFClient(binding, address))
+                {
+                    proxy.RevokeCertificate(certificate);
+                    Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
+                }
+                //remove it from installed certificates
+                //CertManager.DeleteCertificateFromPersonal(certificate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
     }

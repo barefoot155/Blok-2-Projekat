@@ -8,22 +8,24 @@ using System.Security.Cryptography.X509Certificates;
 using System.Diagnostics;
 using System.Threading;
 using System.Security.Principal;
+using System.Security;
+using System.IO;
 
 namespace CertificateServiceManager
 {
     public class CertificateManager : ICertificateManager
     {
-        private EventLog generateCertLog = new EventLog();
-        private string message = string.Empty;
+        //private EventLog generateCertLog = new EventLog();
+        //private string message = string.Empty;
 
         public X509Certificate2 GenerateCertificate(string root)
         {
-            if(!EventLog.SourceExists("ProjectEvents")) //ako baca exception potrebno je u regedit dodeli full control prava korisniku koji pokrece CertificateServiceManager
-            {
-                EventLog.CreateEventSource("ProjectEvents", "CertificateLog");
-            }
-            generateCertLog.Source = "ProjectEvents";
-            generateCertLog.Log = "CertificateLog";
+            //if(!EventLog.SourceExists("ProjectEvents")) //ako baca exception potrebno je u regedit dodeli full control prava korisniku koji pokrece CertificateServiceManager
+            //{
+            //    EventLog.CreateEventSource("ProjectEvents", "CertificateLog");
+            //}
+            //generateCertLog.Source = "ProjectEvents";
+            //generateCertLog.Log = "CertificateLog";
 
             Process p = new Process();
             string path = (AppDomain.CurrentDomain.BaseDirectory + @"\makecert.exe");
@@ -41,9 +43,9 @@ namespace CertificateServiceManager
             }
             catch(Exception e)
             {
-                message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
-                EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
-                CaptureEvent(message, evntTypeFailure);
+                //message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
+                //EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
+                //CaptureEvent(message, evntTypeFailure);
                 return null;
             }
             p.WaitForExit();
@@ -62,17 +64,17 @@ namespace CertificateServiceManager
             }
             catch(Exception e)
             {
-                message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
-                EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
-                CaptureEvent(message, evntTypeFailure);
+                //message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
+                //EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
+                //CaptureEvent(message, evntTypeFailure);
                 return null;
             }
             p2.WaitForExit();
             p2.Dispose();
 
-            message = String.Format("Certificate generated to {0}.", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name);
-            EventLogEntryType evntTypeSuccess = EventLogEntryType.SuccessAudit;
-            CaptureEvent(message, evntTypeSuccess);
+            //message = String.Format("Certificate generated to {0}.", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name);
+            //EventLogEntryType evntTypeSuccess = EventLogEntryType.SuccessAudit;
+            //CaptureEvent(message, evntTypeSuccess);
 
             return null;
         }
@@ -101,14 +103,54 @@ namespace CertificateServiceManager
             return groups;
         }
 
-        private void CaptureEvent(string message, EventLogEntryType evntType)
-        {           
-            generateCertLog.WriteEntry(message, EventLogEntryType.SuccessAudit);
+        //private void CaptureEvent(string message, EventLogEntryType evntType)
+        //{           
+        //    generateCertLog.WriteEntry(message, EventLogEntryType.SuccessAudit);
+        //}
+
+        public void RevokeCertificate(X509Certificate2 cert)
+        {
+            if (cert == null)
+                throw new ArgumentNullException("cert", "Certificate cannot be null");
+
+            //if(!cert.HasPrivateKey) //klijent koji zahteva povlacenje sertifikata NEMA privatni kljuc
+            //{
+            //    throw new SecurityException("Private key is needed to revoke certificate");
+            //}
+
+            AddToRevocationList(cert);
+            DeleteLocalCertificate(cert);
+            //NotifyAllClients(cert);
         }
 
-        public void RevokeCertificate()
+        private void NotifyAllClients(X509Certificate2 cert)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Deletes .cer .pvk and .pfx files from local CMS/Debug folder
+        /// </summary>
+        /// <param name="cert"></param>
+        private void DeleteLocalCertificate(X509Certificate2 cert)
+        {
+            string certName = Helper.ExtractCommonNameFromCertificate(cert);
+            string[] certFiles = { certName + ".cer", certName + ".pvk", certName + ".pfx" };
+
+            foreach(string file in certFiles)
+            {
+                if (File.Exists(file))
+                    File.Delete(file);
+            }
+                
+        }
+
+        private void AddToRevocationList(X509Certificate2 cert)
+        {
+            using (StreamWriter sw = new StreamWriter("RevocationList.txt", true))
+            {                
+                sw.WriteLine(cert.Thumbprint);
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 
 namespace Client
 {
@@ -24,9 +25,11 @@ namespace Client
            return proxy.GenerateCertificate(root);
         }
 
-        public void RevokeCertificate()
+        public void RevokeCertificate(X509Certificate2 certificate)
         {
-            throw new NotImplementedException();
+
+            proxy.RevokeCertificate(certificate);
+
         }
 
         public void SendMessage(string msg, byte[] sign)

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.ServiceModel;
@@ -35,6 +36,7 @@ namespace Client
                 Console.WriteLine("1. Generate Certificate");
                 Console.WriteLine("2. Add rights");
                 Console.WriteLine("3. Connect to server via certificate AUTH");
+                Console.WriteLine("4. Revoke certificate");
                 Console.WriteLine("0. EXIT");
                 option = int.Parse(Console.ReadLine());
 
@@ -48,6 +50,9 @@ namespace Client
                         break;
                     case 3:
                         ConnectToServerViaCert();
+                        break;
+                    case 4:
+                        RevokeCertificate();
                         break;
                     case 0: //exit program
                         break;
@@ -109,6 +114,36 @@ namespace Client
                 }
             }
             catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private static void RevokeCertificate()
+        {
+            try
+            {
+                string myName = WindowsIdentity.GetCurrent().Name.Split('\\')[1];
+                X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.CurrentUser, myName);
+                if (certificate == null)
+                    return;
+
+                NetTcpBinding binding = new NetTcpBinding();
+                InitializeWindowsAuthentication(binding);
+                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
+                using (WCFClient proxy = new WCFClient(binding, address))
+                {
+                    proxy.RevokeCertificate(certificate);
+                    Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
+                }
+                //remove it from installed certificates
+               // CertManager.DeleteCertificateFromPersonal(certificate);
+            }
+            catch (ArgumentNullException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            catch (SecurityException ex)
             {
                 Console.WriteLine(ex.Message);
             }
