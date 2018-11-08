@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CertManager.cs" />
+    <Compile Include="EventLogManager.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="ICertificateManager.cs" />
     <Compile Include="IWCFContracts.cs" />

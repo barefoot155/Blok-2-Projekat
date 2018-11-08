@@ -21,18 +21,7 @@ namespace Server
 
         public ServiceImplementation()
         {
-            if (!EventLog.SourceExists("ConnectionEvents"))
-            {
-                EventLog.CreateEventSource("ConnectionEvents", "ConnectionLog");
-            }
-
-            connectionEvent.Source = "ConnectionEvents";
-            connectionEvent.Log = "ConnectionLog";
-
-            message = String.Format("Client {0} established connection with server.", ServiceSecurityContext.Current.PrimaryIdentity.Name);
-            EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
-
-            connectionEvent.WriteEntry(message, evntType);
+           
         }
         /// <summary>
         /// Test metoda, ne koristi se u projektu
@@ -63,7 +52,20 @@ namespace Server
 
         public void TestCommunication()
         {
-            Console.WriteLine("Communication is established...");
+           Console.WriteLine("Communication is established...");
+
+            if (!EventLog.SourceExists("ProjectEvents"))
+            {
+                EventLog.CreateEventSource("ProjectEvents", "ConnectionLog");
+            }
+
+            connectionEvent.Source = "ProjectEvents";
+            connectionEvent.Log = "ConnectionLog";
+
+           message = String.Format("Client {0} established connection with server.", ServiceSecurityContext.Current.PrimaryIdentity.Name);
+           EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
+
+           connectionEvent.WriteEntry(message, evntType);
         }
 
         private bool isClientAuthorized()

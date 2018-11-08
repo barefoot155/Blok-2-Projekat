@@ -18,11 +18,11 @@ namespace CertificateServiceManager
 
         public X509Certificate2 GenerateCertificate(string root)
         {
-            if(!EventLog.SourceExists("CertificateEvents")) //ako baca exception potrebno je u regedit dodeli full control prava korisniku koji pokrece CertificateServiceManager
+            if(!EventLog.SourceExists("ProjectEvents")) //ako baca exception potrebno je u regedit dodeli full control prava korisniku koji pokrece CertificateServiceManager
             {
-                EventLog.CreateEventSource("CertificateEvents", "CertificateLog");
+                EventLog.CreateEventSource("ProjectEvents", "CertificateLog");
             }
-            generateCertLog.Source = "CertificateEvents";
+            generateCertLog.Source = "ProjectEvents";
             generateCertLog.Log = "CertificateLog";
 
             Process p = new Process();
@@ -63,7 +63,7 @@ namespace CertificateServiceManager
             catch(Exception e)
             {
                 message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
-                EventLogEntryType evntTypeFailure = EventLogEntryType.SuccessAudit;
+                EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
                 CaptureEvent(message, evntTypeFailure);
                 return null;
             }
