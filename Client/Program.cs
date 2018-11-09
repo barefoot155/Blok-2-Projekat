@@ -15,8 +15,11 @@ namespace Client
 {
     class Program
     {
+        static List<WCFClientServer> serverList;
+        public static WCFClientServer myChannel;
         static void Main(string[] args)
         {
+            serverList = new List<WCFClientServer>();
             Prompt();
 
             Console.ReadLine();
@@ -70,7 +73,8 @@ namespace Client
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
-                using (WCFClient proxy = new WCFClient(binding, address))
+                var callbackInstance = new ClientCallback();
+                using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
                 {
                     Console.WriteLine("Choose root: ");
                     string root = Console.ReadLine();
@@ -96,18 +100,21 @@ namespace Client
                 //gets server certificate from trustedPeople folder
                 X509Certificate2 servCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, expectedServer);
                 EndpointAddress addressServer = new EndpointAddress(new Uri("net.tcp://localhost:10000/WCFContracts"), new X509CertificateEndpointIdentity(servCert));
-
-                using (WCFClientServer proxy = new WCFClientServer(bindingServer, addressServer))
+                var callbackInstance = new DisconnectCallback();
+                using (WCFClientServer proxy = new WCFClientServer(callbackInstance, bindingServer, addressServer))
                 {
                     proxy.TestCommunication();
+                    // proxy.Credentials.ServiceCertificate
+                    myChannel = proxy;
                     Console.WriteLine("TestCommunication() finished. Press <enter> to continue ...");
+                    serverList.Add(proxy); //add to connected server list
                     Console.ReadLine();
 
                     Console.WriteLine("Starting to ping server...");
                     Random r = new Random();
                     while (true)
                     {
-                        Thread.Sleep(r.Next(1, 11) * 1000); //sleep 1-10s
+                        Thread.Sleep(r.Next(1, 15) * 1000); //sleep 1-10s
 
                         proxy.PingServer(DateTime.Now);
                     }
@@ -116,6 +123,17 @@ namespace Client
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+            }
+        }
+
+        public static void closeConnection(string hostname)
+        {
+            foreach (var item in serverList)
+            {
+                if(hostname ==  Helper.ExtractCommonNameFromCertificate(item.Credentials.ServiceCertificate.DefaultCertificate))
+                {
+                    item.Close();
+                }
             }
         }
 
@@ -131,7 +149,8 @@ namespace Client
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
-                using (WCFClient proxy = new WCFClient(binding, address))
+                var callbackInstance = new ClientCallback();
+                using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
                 {
                     proxy.RevokeCertificate(certificate);
                     Console.WriteLine("Certificate CN={0} successfully revoked!", myName);

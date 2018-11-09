@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-    public class WCFClient : ChannelFactory<ICertificateManager>, ICertificateManager, IDisposable
+    public class WCFClient : DuplexChannelFactory<ICertificateManager>, ICertificateManager, IDisposable
     {
         ICertificateManager proxy;
-        public WCFClient(NetTcpBinding binding, EndpointAddress address)
-            : base(binding, address)
+        public WCFClient(object callbackInstance, NetTcpBinding binding, EndpointAddress address)
+            : base(callbackInstance, binding, address)
         {
 
             proxy = this.CreateChannel();

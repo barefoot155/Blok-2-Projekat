@@ -18,6 +18,7 @@ namespace Server
     {
         private EventLog connectionEvent = new EventLog();
         private string message = string.Empty;
+        private System.Timers.Timer disconnectTimer = new System.Timers.Timer();
 
         public ServiceImplementation()
         {
@@ -44,12 +45,30 @@ namespace Server
         /// <param name="dt"></param>
         public void PingServer(DateTime dt)
         {
+            if(disconnectTimer.Enabled)
+            {
+                disconnectTimer.Stop();
+                disconnectTimer.Start();
+            }
             if (!isClientAuthorized())
                 throw new SecurityException("Access denied");
 
             X509Certificate2 clientCert = getClientCertificate();
             string commonName = Helper.ExtractCommonNameFromCertificate(clientCert);
             Logger.LogData(dt, commonName);
+
+            disconnectTimer.Interval = 3000;
+            disconnectTimer.Enabled = true;
+            disconnectTimer.Elapsed += DisconnectTimer_Elapsed;
+
+        }
+
+        private void DisconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            message = String.Format("Client {0} disconnect from server.", "x"); //ServiceSecurityContext.Current.PrimaryIdentity.Name);
+            EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
+            EventLogManager.WriteEntryServer(message, evntType);
+            OperationContext.Current.GetCallbackChannel<IDisconnectCallback>().DisconnectClient("close");    
         }
 
         public void TestCommunication()

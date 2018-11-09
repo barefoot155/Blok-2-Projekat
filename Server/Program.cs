@@ -12,6 +12,7 @@ namespace Server
 {
     class Program
     {
+        static WCFService myHost;
         static void Main(string[] args)
         {
             EventLogManager.InitializeServerEventLog();
@@ -62,6 +63,11 @@ namespace Server
             } while (option != 0);
         }
 
+        public static void CloseServerConnection(string serverName)
+        {
+            myHost.CloseServer();
+        }
+
         private static void ConnectToCMS()
         {
             try
@@ -69,7 +75,8 @@ namespace Server
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
-                using (WCFClient proxy = new WCFClient(binding, address))
+                var callbackInstance = new ServerCallback();
+                using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
                 {
                     Console.WriteLine("Choose root: ");
                     string root = Console.ReadLine();
@@ -89,6 +96,7 @@ namespace Server
             {
                 host = new WCFService();
                 host.OpenServer();
+                myHost = host;
                 Console.WriteLine("WCFService is started.\nPress <enter> to stop ...");
                 Console.ReadLine();
             }
@@ -113,13 +121,19 @@ namespace Server
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
-                using (WCFClient proxy = new WCFClient(binding, address))
+                var callbackInstance = new ServerCallback();
+                using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
                 {
                     proxy.RevokeCertificate(certificate);
                     Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
+                    //remove it from installed certificates
+                    CertManager.DeleteCertificateFromPersonal(certificate);
+                    Console.WriteLine("Installing new certificate...");
+                    Console.WriteLine("Enter root name: ");
+                    proxy.GenerateCertificate(Console.ReadLine()); 
                 }
-                //remove it from installed certificates
-                //CertManager.DeleteCertificateFromPersonal(certificate);
+                
+                
             }
             catch (Exception ex)
             {

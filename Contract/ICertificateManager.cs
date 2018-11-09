@@ -9,7 +9,7 @@ using System.Security;
 
 namespace Contract
 {
-    [ServiceContract]
+    [ServiceContract(CallbackContract = typeof(ICertificateCallback))]
     public interface ICertificateManager
     {
         [OperationContract]
@@ -21,5 +21,10 @@ namespace Contract
         void RevokeCertificate(X509Certificate2 certificate);
 
 
+    }
+    public interface ICertificateCallback
+    {
+        [OperationContract]
+        void NotifyClients(string msg, string serverName);
     }
 }

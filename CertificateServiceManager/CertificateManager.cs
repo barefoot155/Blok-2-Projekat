@@ -10,13 +10,22 @@ using System.Threading;
 using System.Security.Principal;
 using System.Security;
 using System.IO;
+using System.ServiceModel;
 
 namespace CertificateServiceManager
 {
+    [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Reentrant)]
     public class CertificateManager : ICertificateManager
     {
         //private EventLog generateCertLog = new EventLog();
         private string message = string.Empty;
+        private List<ICertificateCallback> clients = new List<ICertificateCallback>();
+        public CertificateManager()
+        {
+            ICertificateCallback callback = OperationContext.Current.GetCallbackChannel<ICertificateCallback>();
+            if (!clients.Contains(callback))
+                clients.Add(callback);
+        }
 
         public X509Certificate2 GenerateCertificate(string root)
         {
@@ -111,6 +120,7 @@ namespace CertificateServiceManager
         //    generateCertLog.WriteEntry(message, EventLogEntryType.SuccessAudit);
         //}
 
+        
         public void RevokeCertificate(X509Certificate2 cert)
         {
             if (cert == null)
@@ -123,12 +133,18 @@ namespace CertificateServiceManager
 
             AddToRevocationList(cert);
             DeleteLocalCertificate(cert);
-            //NotifyAllClients(cert);
+
+            
+            clients.Remove(OperationContext.Current.GetCallbackChannel<ICertificateCallback>());
+            NotifyAllClients(cert);
         }
 
         private void NotifyAllClients(X509Certificate2 cert)
         {
-            throw new NotImplementedException();
+            foreach (var item in clients)
+            {
+                item.NotifyClients(cert.Thumbprint, Helper.ExtractCommonNameFromCertificate(cert));
+            }
         }
 
         /// <summary>

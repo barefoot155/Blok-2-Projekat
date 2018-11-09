@@ -10,16 +10,17 @@ using System.Security.Principal;
 
 namespace Client
 {
-    public class WCFClient : ChannelFactory<ICertificateManager>, ICertificateManager, IDisposable
+    public class WCFClient : DuplexChannelFactory<ICertificateManager>, ICertificateManager, IDisposable
     {
         ICertificateManager proxy;
-        public WCFClient(NetTcpBinding binding, EndpointAddress address)
-            : base(binding, address)
+        public WCFClient(object callbackInstance, NetTcpBinding binding, EndpointAddress address)
+            : base(callbackInstance,binding, address)
         {
 
             proxy = this.CreateChannel();
         }
 
+       
         public X509Certificate2 GenerateCertificate(string root)
         {
            return proxy.GenerateCertificate(root);
@@ -30,16 +31,6 @@ namespace Client
 
             proxy.RevokeCertificate(certificate);
 
-        }
-
-        public void SendMessage(string msg, byte[] sign)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void TestCommunication()
-        {
-            throw new NotImplementedException();
         }
     }
 }

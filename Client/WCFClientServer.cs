@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 
 namespace Client
 {
-    public class WCFClientServer : ChannelFactory<IWCFContracts>, IWCFContracts, IDisposable
+    public class WCFClientServer : DuplexChannelFactory<IWCFContracts>, IWCFContracts, IDisposable
     {
         IWCFContracts proxy;
-        public WCFClientServer(NetTcpBinding binding, EndpointAddress address)
-            : base(binding, address)
+        public WCFClientServer(object callbackInstance, NetTcpBinding binding, EndpointAddress address)
+            : base(callbackInstance, binding, address)
         {
             this.Credentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.ChainTrust;
             this.Credentials.ServiceCertificate.Authentication.RevocationMode = X509RevocationMode.NoCheck;

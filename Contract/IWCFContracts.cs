@@ -7,14 +7,20 @@ using System.ServiceModel;
 
 namespace Contract
 {
-    [ServiceContract]
+    [ServiceContract(CallbackContract = typeof(IDisconnectCallback))]
     public interface IWCFContracts
     {
-        [OperationContract]
+        [OperationContract(IsOneWay = true)]
         void TestCommunication();
-        [OperationContract]
+        [OperationContract(IsOneWay = true)]
         void SendMessage(string msg);
         [OperationContract]
         void PingServer(DateTime dt);
+    }
+
+    public interface IDisconnectCallback
+    {
+        [OperationContract]
+        void DisconnectClient(string msg);
     }
 }
