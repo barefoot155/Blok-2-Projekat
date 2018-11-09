@@ -16,7 +16,7 @@ namespace CertificateServiceManager
     public class CertificateManager : ICertificateManager
     {
         //private EventLog generateCertLog = new EventLog();
-        //private string message = string.Empty;
+        private string message = string.Empty;
 
         public X509Certificate2 GenerateCertificate(string root)
         {
@@ -43,9 +43,10 @@ namespace CertificateServiceManager
             }
             catch(Exception e)
             {
-                //message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
-                //EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
+                message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
+                EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
                 //CaptureEvent(message, evntTypeFailure);
+                EventLogManager.WriteEntryCMS(message, evntTypeFailure);
                 return null;
             }
             p.WaitForExit();
@@ -64,17 +65,19 @@ namespace CertificateServiceManager
             }
             catch(Exception e)
             {
-                //message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
-                //EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
+                message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
+                EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
                 //CaptureEvent(message, evntTypeFailure);
+                EventLogManager.WriteEntryCMS(message, evntTypeFailure);
                 return null;
             }
             p2.WaitForExit();
             p2.Dispose();
 
-            //message = String.Format("Certificate generated to {0}.", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name);
-            //EventLogEntryType evntTypeSuccess = EventLogEntryType.SuccessAudit;
+            message = String.Format("Certificate generated to {0}.", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name);
+            EventLogEntryType evntTypeSuccess = EventLogEntryType.SuccessAudit;
             //CaptureEvent(message, evntTypeSuccess);
+            EventLogManager.WriteEntryCMS(message, evntTypeSuccess);
 
             return null;
         }

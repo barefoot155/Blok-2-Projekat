@@ -14,6 +14,7 @@ namespace Server
     {
         static void Main(string[] args)
         {
+            EventLogManager.InitializeServerEventLog();
             Prompt();
 
             Console.ReadKey();

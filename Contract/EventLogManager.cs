@@ -7,14 +7,61 @@ using System.Threading.Tasks;
 
 namespace Contract
 {
-    public class EventLogManager
+    public static class EventLogManager
     {
-        public EventLogManager()
+        private static EventLog generateCertLog = new EventLog();
+        private static EventLog generateServerLog = new EventLog();
+
+        public static void InitializeCMSEventLog()
         {
-            if (!EventLog.SourceExists("ProjectEvents"))
+            string source = "CerificateEvents";
+            string logName = "CertificateLog";
+
+            try
             {
-                EventLog.CreateEventSource("ProjectEvents", "CertificateLog");
+                if (!EventLog.SourceExists(source)) //ako baca exception potrebno je u regedit dodeli full control prava korisniku koji pokrece CertificateServiceManager
+                {
+                    EventLog.CreateEventSource(source, logName);
+                }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine("[CMSEventLog] Exception: " + e.Message);
+            }
+
+
+            generateCertLog.Source = source;
+            generateCertLog.Log = logName;
+        }
+
+        public static void InitializeServerEventLog()
+        {
+            string source = "ServerEvents";
+            string logName = "ServerLog";
+
+            try
+            {
+                if (!EventLog.SourceExists(source)) //ako baca exception potrebno je u regedit dodeli full control prava korisniku koji pokrece CertificateServiceManager
+                {
+                    EventLog.CreateEventSource(source, logName);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("[ServerEventLog] Exception: " + e.Message);
+            }
+            generateServerLog.Source = source;
+            generateServerLog.Log = logName;
+        }
+
+        public static void WriteEntryCMS(string message, EventLogEntryType evntType)
+        {
+            generateCertLog.WriteEntry(message, evntType);
+        }
+
+        public static void WriteEntryServer(string message, EventLogEntryType evntType)
+        {
+            generateServerLog.WriteEntry(message, evntType);
         }
     }
 }

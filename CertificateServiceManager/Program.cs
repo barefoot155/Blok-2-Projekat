@@ -13,6 +13,7 @@ namespace CertificateServiceManager
     {
         static void Main(string[] args)
         {
+            EventLogManager.InitializeCMSEventLog();
             NetTcpBinding binding = new NetTcpBinding();
             InitializeWindowsAuthentication(binding);
 
