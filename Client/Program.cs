@@ -142,7 +142,7 @@ namespace Client
             try
             {
                 string myName = WindowsIdentity.GetCurrent().Name.Split('\\')[1];
-                X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.CurrentUser, myName);
+                X509Certificate2 certificate = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, myName);
                 if (certificate == null)
                     return;
 

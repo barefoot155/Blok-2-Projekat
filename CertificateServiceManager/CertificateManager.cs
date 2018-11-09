@@ -19,7 +19,7 @@ namespace CertificateServiceManager
     {
         //private EventLog generateCertLog = new EventLog();
         private string message = string.Empty;
-        private List<ICertificateCallback> clients = new List<ICertificateCallback>();
+        private static List<ICertificateCallback> clients = new List<ICertificateCallback>();
         public CertificateManager()
         {
             ICertificateCallback callback = OperationContext.Current.GetCallbackChannel<ICertificateCallback>();
