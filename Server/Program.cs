@@ -12,13 +12,35 @@ namespace Server
 {
     class Program
     {
-        static WCFService myHost;
+        static WCFService myHost; //host service for my Clients
+        static WCFClient cmsClient; //connection to CMS
+
+        internal static List<IDisconnectCallback> myClients = new List<IDisconnectCallback>(); //list of servers clients
         static void Main(string[] args)
         {
-            EventLogManager.InitializeServerEventLog();
-            Prompt();
+            //connect to CMS on start-up
+            try
+            {
+                EventLogManager.InitializeServerEventLog();
 
-            Console.ReadKey();
+                cmsClient = ConnectToCMS();
+                if (cmsClient == null)
+                    throw new Exception("Connection with CMS not established");
+
+                Console.WriteLine("*Successfully connected to CMS*");
+                Prompt();
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                cmsClient.Close();
+            }
+
+            Console.WriteLine("\n> Press enter to close program");
+            Console.ReadLine();
         }
 
         public static void InitializeWindowsAuthentication(NetTcpBinding binding)
@@ -43,7 +65,9 @@ namespace Server
                 switch (option)
                 {
                     case 1:
-                        ConnectToCMS();
+                        Console.WriteLine("Choose root: ");
+                        string root = Console.ReadLine();
+                        cmsClient.GenerateCertificate(root);
                         break;
                     case 2:
                         Helper.ProvideCertRight(WindowsIdentity.GetCurrent().Name);
@@ -65,10 +89,11 @@ namespace Server
 
         public static void CloseServerConnection(string serverName)
         {
-            myHost.CloseServer();
+            if (myHost != null)
+                myHost.CloseServer();
         }
 
-        private static void ConnectToCMS()
+        private static WCFClient ConnectToCMS()
         {
             try
             {
@@ -76,21 +101,23 @@ namespace Server
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
                 var callbackInstance = new ServerCallback();
-                using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
-                {
-                    Console.WriteLine("Choose root: ");
-                    string root = Console.ReadLine();
-                    proxy.GenerateCertificate(root);
-                }
+
+                WCFClient proxy = new WCFClient(callbackInstance, binding, address);
+                proxy.RegisterClient();
+                
+                //proxy.GenerateCertificate(root);
+                return proxy;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                return null;
             }            
         }
 
         private static void HostServer()
         {
+
             WCFService host = null;
             try
             {

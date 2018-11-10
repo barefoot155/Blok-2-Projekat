@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 
 namespace Server
 {
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession, ConcurrencyMode = ConcurrencyMode.Reentrant)]
     public class ServiceImplementation : IWCFContracts
     {
         private EventLog connectionEvent = new EventLog();
@@ -59,7 +60,7 @@ namespace Server
 
             disconnectTimer.Interval = 3000;
             disconnectTimer.Enabled = true;
-            disconnectTimer.Elapsed += DisconnectTimer_Elapsed;
+            //disconnectTimer.Elapsed += DisconnectTimer_Elapsed;
 
         }
 
@@ -74,19 +75,24 @@ namespace Server
         public void TestCommunication()
         {
            Console.WriteLine("Communication is established...");
+            //add client to list
+            IDisconnectCallback callback = OperationContext.Current.GetCallbackChannel<IDisconnectCallback>();
+            if (!Program.myClients.Contains(callback))
+                Program.myClients.Add(callback);
 
-           // if (!EventLog.SourceExists("ProjectEvents"))
-           // {
-           //     EventLog.CreateEventSource("ProjectEvents", "ConnectionLog");
-           // }
 
-           // connectionEvent.Source = "ProjectEvents";
-           // connectionEvent.Log = "ConnectionLog";
+            // if (!EventLog.SourceExists("ProjectEvents"))
+            // {
+            //     EventLog.CreateEventSource("ProjectEvents", "ConnectionLog");
+            // }
 
-           //message = String.Format("Client {0} established connection with server.", ServiceSecurityContext.Current.PrimaryIdentity.Name);
-           //EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
+            // connectionEvent.Source = "ProjectEvents";
+            // connectionEvent.Log = "ConnectionLog";
 
-           //connectionEvent.WriteEntry(message, evntType);
+            //message = String.Format("Client {0} established connection with server.", ServiceSecurityContext.Current.PrimaryIdentity.Name);
+            //EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
+
+            //connectionEvent.WriteEntry(message, evntType);
         }
 
         private bool isClientAuthorized()

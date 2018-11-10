@@ -17,11 +17,11 @@ namespace Client
             if (msg.ToLower().Equals("close"))
             {               
                 
-                Program.myChannel.Close();
-                if (Program.myChannel.State == System.ServiceModel.CommunicationState.Closed)
-                {
-                    Console.WriteLine("Client closed connection with server.");
-                }
+                //Program.myChannel.Close();
+                //if (Program.myChannel.State == System.ServiceModel.CommunicationState.Closed)
+                //{
+                //    Console.WriteLine("Client closed connection with server.");
+                //}
             }
         }
     }

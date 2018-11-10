@@ -20,6 +20,8 @@ namespace Contract
         [FaultContract(typeof(ArgumentNullException))]
         void RevokeCertificate(X509Certificate2 certificate);
 
+        [OperationContract]
+        void RegisterClient();
 
     }
     public interface ICertificateCallback

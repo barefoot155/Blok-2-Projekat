@@ -24,6 +24,11 @@ namespace Server
            return proxy.GenerateCertificate(root);
         }
 
+        public void RegisterClient()
+        {
+            proxy.RegisterClient();
+        }
+
         public void RevokeCertificate(X509Certificate2 certificate)
         {
             proxy.RevokeCertificate(certificate);

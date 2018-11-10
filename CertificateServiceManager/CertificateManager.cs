@@ -14,7 +14,8 @@ using System.ServiceModel;
 
 namespace CertificateServiceManager
 {
-    [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Reentrant)]
+    //[ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Reentrant)]   
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession, ConcurrencyMode = ConcurrencyMode.Reentrant)]
     public class CertificateManager : ICertificateManager
     {
         //private EventLog generateCertLog = new EventLog();
@@ -22,9 +23,6 @@ namespace CertificateServiceManager
         private static List<ICertificateCallback> clients = new List<ICertificateCallback>();
         public CertificateManager()
         {
-            ICertificateCallback callback = OperationContext.Current.GetCallbackChannel<ICertificateCallback>();
-            if (!clients.Contains(callback))
-                clients.Add(callback);
         }
 
         public X509Certificate2 GenerateCertificate(string root)
@@ -132,7 +130,7 @@ namespace CertificateServiceManager
             //}
 
             AddToRevocationList(cert);
-            DeleteLocalCertificate(cert);
+            //DeleteLocalCertificate(cert);
 
             
             clients.Remove(OperationContext.Current.GetCallbackChannel<ICertificateCallback>());
@@ -143,7 +141,12 @@ namespace CertificateServiceManager
         {
             foreach (var item in clients)
             {
-                item.NotifyClients(cert.Thumbprint, Helper.ExtractCommonNameFromCertificate(cert));
+                try
+                {
+                    item.NotifyClients(cert.Thumbprint, Helper.ExtractCommonNameFromCertificate(cert));
+                }
+                catch (Exception) //some clients might have disconnected in the meantime
+                { }
             }
         }
 
@@ -170,6 +173,16 @@ namespace CertificateServiceManager
             {                
                 sw.WriteLine(cert.Thumbprint);
             }
+        }
+
+        /// <summary>
+        /// adds CMS client to the list of all clients
+        /// </summary>
+        public void RegisterClient()
+        {
+            ICertificateCallback callback = OperationContext.Current.GetCallbackChannel<ICertificateCallback>();
+            if (!clients.Contains(callback))
+                clients.Add(callback);
         }
     }
 }
