@@ -86,7 +86,31 @@ namespace CertificateServiceManager
             //CaptureEvent(message, evntTypeSuccess);
             EventLogManager.WriteEntryCMS(message, evntTypeSuccess);
 
+            /// try-catch necessary if either the speficied file doesn't exist or password is incorrect
+            try
+            {
+                X509Certificate2 certificate = new X509Certificate2(userName + ".cer", "123");
+                NetTcpBinding binding = new NetTcpBinding();
+                InitializeWindowsAuthentication(binding);
+                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:10100/BackupData"));
+                using (WCFBackupClient proxy = new WCFBackupClient(binding, address))
+                {
+                    proxy.ReplicateCertificate(certificate.Subject + ", thumbprint: " + certificate.Thumbprint);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error while trying to replicate certificate {0}. ERROR = {1}", userName, e.Message);
+            }
+
             return null;
+        }
+
+        private void InitializeWindowsAuthentication(NetTcpBinding binding)
+        {
+            binding.Security.Mode = SecurityMode.Transport;
+            binding.Security.Transport.ProtectionLevel = System.Net.Security.ProtectionLevel.EncryptAndSign;
+            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Windows;
         }
 
         private string GetUserGroups(WindowsIdentity windowsIdentity)
@@ -167,6 +191,20 @@ namespace CertificateServiceManager
             using (StreamWriter sw = new StreamWriter("RevocationList.txt", true))
             {                
                 sw.WriteLine(cert.Thumbprint);
+            }
+            NetTcpBinding binding = new NetTcpBinding();
+            InitializeWindowsAuthentication(binding);
+            EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:10100/BackupData"));
+            try
+            {
+                using (WCFBackupClient proxy = new WCFBackupClient(binding, address))
+                {
+                    proxy.ReplicateRevokedCert(cert.Subject + ", thumbprint: " + cert.Thumbprint);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error while trying to replicate certificate {0}. ERROR = {1}", cert.Subject, e.Message);
             }
         }
 

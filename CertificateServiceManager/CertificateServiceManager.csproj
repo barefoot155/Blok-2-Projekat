@@ -68,6 +68,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RootCert.cs" />
+    <Compile Include="WCFBackupClient.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

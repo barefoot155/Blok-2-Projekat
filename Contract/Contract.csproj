@@ -62,6 +62,7 @@
     <Compile Include="CertManager.cs" />
     <Compile Include="EventLogManager.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="IBackupData.cs" />
     <Compile Include="ICertificateManager.cs" />
     <Compile Include="IWCFContracts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

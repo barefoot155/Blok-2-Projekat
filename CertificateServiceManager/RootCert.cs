@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.ServiceModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,8 +31,29 @@ namespace CertificateServiceManager
             p.Dispose();
 
             Console.WriteLine("Created new self-signed certificate");
+            
+            /// try-catch necessary if either the speficied file doesn't exist or password is incorrect
+            try
+            {
+                X509Certificate2 certificate = new X509Certificate2(root + ".cer");
+                NetTcpBinding binding = new NetTcpBinding();
+                InitializeWindowsAuthentication(binding);
+                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:10100/BackupData"));
+                using (WCFBackupClient proxy = new WCFBackupClient(binding, address))
+                {
+                    proxy.ReplicateCertificate(certificate.Subject + ", thumbprint: " + certificate.Thumbprint);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error while trying to replicate certificate {0}. ERROR = {1}", root, e.Message);
+            }
         }
-
-        
+        private void InitializeWindowsAuthentication(NetTcpBinding binding)
+        {
+            binding.Security.Mode = SecurityMode.Transport;
+            binding.Security.Transport.ProtectionLevel = System.Net.Security.ProtectionLevel.EncryptAndSign;
+            binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Windows;
+        }
     }
 }
