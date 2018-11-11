@@ -10,9 +10,9 @@ namespace Contract
     [ServiceContract(CallbackContract = typeof(IDisconnectCallback))]
     public interface IWCFContracts
     {
-       // [OperationContract(IsOneWay = true)]
+        [OperationContract(IsOneWay = true)]
         void TestCommunication();
-       // [OperationContract(IsOneWay = true)]
+        [OperationContract(IsOneWay = true)]
         void SendMessage(string msg);
         [OperationContract]
         void PingServer(DateTime dt);

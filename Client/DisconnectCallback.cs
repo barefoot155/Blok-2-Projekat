@@ -9,19 +9,19 @@ using System.Diagnostics;
 
 namespace Client
 {
+
     public class DisconnectCallback : IDisconnectCallback
     {
         public void DisconnectClient(string msg)
         {
-            Console.WriteLine("bilo sta");
+            Console.WriteLine("Disconnect CALLBACK");
             if (msg.ToLower().Equals("close"))
-            {               
-                
-                //Program.myChannel.Close();
-                //if (Program.myChannel.State == System.ServiceModel.CommunicationState.Closed)
-                //{
-                //    Console.WriteLine("Client closed connection with server.");
-                //}
+            { 
+                Program.myChannel.Close();
+                if (Program.myChannel.State == System.ServiceModel.CommunicationState.Closed)
+                {
+                    Console.WriteLine("Client closed connection with server.");
+                }
             }
         }
     }

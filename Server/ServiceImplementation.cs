@@ -8,9 +8,11 @@ using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Server
 {
@@ -49,6 +51,7 @@ namespace Server
             if(disconnectTimer.Enabled)
             {
                 disconnectTimer.Stop();
+                
                 disconnectTimer.Start();
             }
             if (!isClientAuthorized())
@@ -58,18 +61,24 @@ namespace Server
             string commonName = Helper.ExtractCommonNameFromCertificate(clientCert);
             Logger.LogData(dt, commonName);
 
-            disconnectTimer.Interval = 3000;
+            disconnectTimer.Interval = 10000;
             disconnectTimer.Enabled = true;
-            //disconnectTimer.Elapsed += DisconnectTimer_Elapsed;
+            disconnectTimer.AutoReset = false;
 
+            IDisconnectCallback currentClient = OperationContext.Current.GetCallbackChannel<IDisconnectCallback>();
+            string clientIpAddress = (OperationContext.Current.IncomingMessageProperties[RemoteEndpointMessageProperty.Name] as RemoteEndpointMessageProperty).Address;
+
+            disconnectTimer.Elapsed += (sender, e) => DisconnectTimer_Elapsed(sender, e, currentClient, clientIpAddress);
         }
 
-        private void DisconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void DisconnectTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e, IDisconnectCallback client, string clientIP)
         {
-            message = String.Format("Client {0} disconnect from server.", "x"); //ServiceSecurityContext.Current.PrimaryIdentity.Name);
+            message = String.Format("Client {0} disconnect from server.", clientIP);
             EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
             EventLogManager.WriteEntryServer(message, evntType);
-            OperationContext.Current.GetCallbackChannel<IDisconnectCallback>().DisconnectClient("close");    
+
+            //send disconnect
+            client.DisconnectClient("close");
         }
 
         public void TestCommunication()

@@ -124,13 +124,8 @@ namespace CertificateServiceManager
             if (cert == null)
                 throw new ArgumentNullException("cert", "Certificate cannot be null");
 
-            //if(!cert.HasPrivateKey) //klijent koji zahteva povlacenje sertifikata NEMA privatni kljuc
-            //{
-            //    throw new SecurityException("Private key is needed to revoke certificate");
-            //}
-
             AddToRevocationList(cert);
-            //DeleteLocalCertificate(cert);
+            //DeleteLocalCertificate(cert);   //ZAKOMENTARISANO ZA SVRHE TESTIRANJA (da ne brise svaki put) -> otkomentarisati na kraju
 
             
             clients.Remove(OperationContext.Current.GetCallbackChannel<ICertificateCallback>());

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Contract;
 using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
+using System.Security.Principal;
 
 namespace Server
 {
@@ -14,7 +15,8 @@ namespace Server
         public void NotifyClients(string msg, string serverName)
         {
             Console.WriteLine("Callback from CMS");
-            X509Certificate2 servCert = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, serverName);
+            string myName = WindowsIdentity.GetCurrent().Name.Split('\\')[1];
+            X509Certificate2 servCert = CertManager.GetCertificateFromStorage(StoreName.My, StoreLocation.LocalMachine, myName);
             if (servCert != null)
             {
                 if (servCert.Thumbprint == msg)

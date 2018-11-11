@@ -16,13 +16,13 @@ namespace Client
 {
     class Program
     {
-        static List<WCFClientServer> serverList;
+        //static List<WCFClientServer> serverList;
         internal static WCFClientServer myChannel;
         static WCFClient cmsClient; //connection to CMS
         
         static void Main(string[] args)
         {
-            serverList = new List<WCFClientServer>();
+            //serverList = new List<WCFClientServer>();
             
             try
             {
@@ -32,9 +32,7 @@ namespace Client
                     throw new Exception("Connection with CMS not established");
 
                 Console.WriteLine("*Successfully connected to CMS*");
-                //WCFClientServer myChan = ConnectToServerViaCert();  //svaki treba da vrati svoj proxy, jer ovako koristi isti (static) myChannel
-                //kad jedan client ugasi koenkciju sa serverom, drugima se konekcija upadne u Faulted state => ne sme static jebeni izgleda za to
-                
+                                
                 Prompt();
             }
             catch (Exception ex)
@@ -140,9 +138,9 @@ namespace Client
                 proxy.TestCommunication();
                 Console.WriteLine("TestCommunication() with server successful.");
                 // proxy.Credentials.ServiceCertificate
-                myChannel = proxy;
+               // myChannel = proxy;
 
-                serverList.Add(proxy); //add to connected server list
+                //serverList.Add(proxy); //add to connected server list
                                        // Console.ReadLine();
 
                // PingServer(proxy);
@@ -207,13 +205,18 @@ namespace Client
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
                 var callbackInstance = new ClientCallback();
-                using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
-                {
-                    proxy.RevokeCertificate(certificate);
+                //using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
+                //{
+                    cmsClient.RevokeCertificate(certificate);
                     Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
-                }
+                //}
                 //remove it from installed certificates
-               // CertManager.DeleteCertificateFromPersonal(certificate);
+                // CertManager.DeleteCertificateFromPersonal(certificate);
+
+                //ZAKOMENTARISANO ZBOG LAKSEG TESTIRANJA -> OTKOMENTARISATI NA KRAJU             <----------------- OTKOMENTARISATI NA KRAJU
+            //    Console.WriteLine("Generating new certificate...");
+            //    Console.WriteLine("Enter root name: ");
+            //    cmsClient.GenerateCertificate(Console.ReadLine());
             }
             catch (ArgumentNullException ex)
             {

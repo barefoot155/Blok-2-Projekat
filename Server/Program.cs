@@ -149,18 +149,21 @@ namespace Server
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
                 var callbackInstance = new ServerCallback();
-                using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
-                {
-                    proxy.RevokeCertificate(certificate);
+                //using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
+                //{
+                    cmsClient.RevokeCertificate(certificate);
                     Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
-                    //remove it from installed certificates
-                    CertManager.DeleteCertificateFromPersonal(certificate);
-                    Console.WriteLine("Installing new certificate...");
-                    Console.WriteLine("Enter root name: ");
-                    proxy.GenerateCertificate(Console.ReadLine()); 
-                }
-                
-                
+                //remove it from installed certificates
+                //CertManager.DeleteCertificateFromPersonal(certificate);
+
+
+                //ZAKOMENTARISANO ZBOG LAKSEG TESTIRANJA -> OTKOMENTARISATI NA KRAJU             <----------------- OTKOMENTARISATI NA KRAJU
+                //Console.WriteLine("Generating new certificate...");
+                //Console.WriteLine("Enter root name: ");
+                //cmsClient.GenerateCertificate(Console.ReadLine());                      
+                //}
+
+
             }
             catch (Exception ex)
             {
