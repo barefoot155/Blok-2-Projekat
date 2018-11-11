@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Contract;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using System.ServiceModel;
 using System.Text;
 using System.Threading;
@@ -26,7 +28,18 @@ namespace CertificateServiceManager
             string arguments = string.Format("-n \"CN = {0}\" -r -sv {0}.pvk {0}.cer", root);
             ProcessStartInfo info = new ProcessStartInfo(path, arguments);
             p.StartInfo = info;
-            p.Start();
+            try
+            {
+                p.Start();
+            }
+            catch (Exception e)
+            {
+                string message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
+                EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
+                EventLogManager.WriteEntryCMS(message, evntTypeFailure);
+                return;
+            }
+
             p.WaitForExit();
             p.Dispose();
 

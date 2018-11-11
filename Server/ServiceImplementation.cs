@@ -88,20 +88,7 @@ namespace Server
             IDisconnectCallback callback = OperationContext.Current.GetCallbackChannel<IDisconnectCallback>();
             if (!Program.myClients.Contains(callback))
                 Program.myClients.Add(callback);
-
-
-            // if (!EventLog.SourceExists("ProjectEvents"))
-            // {
-            //     EventLog.CreateEventSource("ProjectEvents", "ConnectionLog");
-            // }
-
-            // connectionEvent.Source = "ProjectEvents";
-            // connectionEvent.Log = "ConnectionLog";
-
-            //message = String.Format("Client {0} established connection with server.", ServiceSecurityContext.Current.PrimaryIdentity.Name);
-            //EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
-
-            //connectionEvent.WriteEntry(message, evntType);
+            
         }
 
         private bool isClientAuthorized()
@@ -111,14 +98,9 @@ namespace Server
                 X509Certificate2 clientCert = getClientCertificate(); 
 
                 string subjectName = clientCert.SubjectName.Name;
+                string OU = subjectName.Split(',')[1];
 
-                if (subjectName.Contains("RegionWest"))
-                    return true;
-                if (subjectName.Contains("RegionEast"))
-                    return true;
-                if (subjectName.Contains("RegionNorth"))
-                    return true;
-                if (subjectName.Contains("RegionSouth"))
+                if (OU.Contains("RegionWest") || OU.Contains("RegionEast") || OU.Contains("RegionNorth") || OU.Contains("RegionSouth"))
                     return true;
 
                 return false;

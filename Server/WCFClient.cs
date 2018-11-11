@@ -32,16 +32,6 @@ namespace Server
         public void RevokeCertificate(X509Certificate2 certificate)
         {
             proxy.RevokeCertificate(certificate);
-        }
-
-        public void SendMessage(string msg, byte[] sign)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void TestCommunication()
-        {
-            throw new NotImplementedException();
-        }
+        }        
     }
 }

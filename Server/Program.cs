@@ -59,8 +59,8 @@ namespace Server
                 Console.WriteLine("2. Add rights to certificate");
                 Console.WriteLine("3. Host Server with certificate AUTH");
                 Console.WriteLine("4. Revoke certificate");
-                Console.WriteLine("0. EXIT");
-                option = int.Parse(Console.ReadLine());
+                Console.WriteLine("5. EXIT");
+                int.TryParse(Console.ReadLine(),out option);
 
                 switch (option)
                 {
@@ -78,13 +78,13 @@ namespace Server
                     case 4:
                         RevokeCertificate();
                         break;
-                    case 0: //exit program
+                    case 5: //exit program
                         break;
                     default:
                         Console.WriteLine("Invalid input");
                         break;
                 }
-            } while (option != 0);
+            } while (option != 5);
         }
 
         public static void CloseServerConnection(string serverName)

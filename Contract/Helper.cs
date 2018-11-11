@@ -20,7 +20,16 @@ namespace Contract
             ProcessStartInfo info = new ProcessStartInfo(path, arguments);
             info.Verb = "runas"; //run as administrator
             p.StartInfo = info;
-            p.Start();
+            try
+            {
+                p.Start();
+            }
+            catch (Exception e)
+            {               
+                Console.WriteLine("Cannot find file "+path + " Error: "+e.Message);
+                return;
+            }
+
             p.WaitForExit();
             p.Dispose();
         }

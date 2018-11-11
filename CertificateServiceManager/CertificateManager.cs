@@ -14,11 +14,9 @@ using System.ServiceModel;
 
 namespace CertificateServiceManager
 {
-    //[ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Reentrant)]   
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession, ConcurrencyMode = ConcurrencyMode.Reentrant)]
     public class CertificateManager : ICertificateManager
     {
-        //private EventLog generateCertLog = new EventLog();
         private string message = string.Empty;
         private static List<ICertificateCallback> clients = new List<ICertificateCallback>();
         public CertificateManager()
@@ -27,13 +25,6 @@ namespace CertificateServiceManager
 
         public X509Certificate2 GenerateCertificate(string root)
         {
-            //if(!EventLog.SourceExists("ProjectEvents")) //ako baca exception potrebno je u regedit dodeli full control prava korisniku koji pokrece CertificateServiceManager
-            //{
-            //    EventLog.CreateEventSource("ProjectEvents", "CertificateLog");
-            //}
-            //generateCertLog.Source = "ProjectEvents";
-            //generateCertLog.Log = "CertificateLog";
-
             Process p = new Process();
             string path = (AppDomain.CurrentDomain.BaseDirectory + @"\makecert.exe");
             string userName = Thread.CurrentPrincipal.Identity.Name.Split('\\')[1];
@@ -136,12 +127,6 @@ namespace CertificateServiceManager
 
             return groups;
         }
-
-        //private void CaptureEvent(string message, EventLogEntryType evntType)
-        //{           
-        //    generateCertLog.WriteEntry(message, EventLogEntryType.SuccessAudit);
-        //}
-
         
         public void RevokeCertificate(X509Certificate2 cert)
         {

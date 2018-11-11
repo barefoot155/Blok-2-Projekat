@@ -67,8 +67,8 @@ namespace Client
                 Console.WriteLine("3. Connect to server via certificate AUTH");
                 Console.WriteLine("4. Revoke certificate");
                 Console.WriteLine("5. Ping server");
-                Console.WriteLine("0. EXIT");
-                option = int.Parse(Console.ReadLine());
+                Console.WriteLine("6. EXIT");
+                int.TryParse(Console.ReadLine(),out option);
 
                 switch (option)
                 {
@@ -90,13 +90,13 @@ namespace Client
                     case 5:
                         PingServer(myChannel); //u novom threadu mozda bolje
                         break;
-                    case 0: //exit program
+                    case 6: //exit program
                         break;
                     default:
                         Console.WriteLine("Invalid input");
                         break;
                 }
-            } while (option != 0);
+            } while (option != 6);
         }
 
         private static WCFClient ConnectToCMS()
@@ -162,7 +162,7 @@ namespace Client
             {
                 while (true)
                 {
-                    Thread.Sleep(r.Next(1, 11) * 1000); //sleep 1-10s
+                    Thread.Sleep(r.Next(8, 15) * 1000); //sleep 1-10s
 
                     proxy.PingServer(DateTime.Now);
                 }
