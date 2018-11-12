@@ -30,17 +30,6 @@ namespace Server
 
             EventLogManager.WriteEntryServer(message, evntType);
         }
-        /// <summary>
-        /// Test metoda, ne koristi se u projektu
-        /// </summary>
-        /// <param name="msg"></param>
-        public void SendMessage(string msg)
-        {
-            if (!isClientAuthorized())
-                throw new SecurityException("Access denied");
-
-            Console.WriteLine("Client sent msg: {0}", msg);
-        }
 
         /// <summary>
         /// Called every 1-10s
@@ -48,14 +37,15 @@ namespace Server
         /// <param name="dt"></param>
         public void PingServer(DateTime dt)
         {
-            if(disconnectTimer.Enabled)
+            if (!isClientAuthorized())
+                throw new SecurityException("Access denied");
+
+            if (disconnectTimer.Enabled)
             {
                 disconnectTimer.Stop();
                 
                 disconnectTimer.Start();
             }
-            if (!isClientAuthorized())
-                throw new SecurityException("Access denied");
 
             X509Certificate2 clientCert = getClientCertificate();
             string commonName = Helper.ExtractCommonNameFromCertificate(clientCert);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ServiceModel;
+using System.Security;
 
 namespace Contract
 {
@@ -12,9 +13,8 @@ namespace Contract
     {
         [OperationContract(IsOneWay = true)]
         void TestCommunication();
-        [OperationContract(IsOneWay = true)]
-        void SendMessage(string msg);
         [OperationContract]
+        [FaultContract(typeof(SecurityException))]
         void PingServer(DateTime dt);
     }
 

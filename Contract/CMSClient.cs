@@ -8,22 +8,25 @@ using System.Threading.Tasks;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 
-namespace Client
+namespace Contract
 {
-    public class WCFClient : DuplexChannelFactory<ICertificateManager>, ICertificateManager, IDisposable
+    public class CMSClient : DuplexChannelFactory<ICertificateManager>, ICertificateManager, IDisposable
     {
         ICertificateManager proxy;
-        public WCFClient(object callbackInstance, NetTcpBinding binding, EndpointAddress address)
-            : base(callbackInstance,binding, address)
+        public CMSClient(object callbackInstance, NetTcpBinding binding, EndpointAddress address)
+            : base(callbackInstance, binding, address)
         {
-
             proxy = this.CreateChannel();
         }
 
-       
-        public X509Certificate2 GenerateCertificate(string root)
+        public void GenerateCertificate(string root)
         {
-           return proxy.GenerateCertificate(root);
+           proxy.GenerateCertificate(root);
+        }
+
+        public void GenerateCertificateWithoutPVK(string root)
+        {
+            proxy.GenerateCertificateWithoutPVK(root);
         }
 
         public void RegisterClient()
@@ -33,9 +36,7 @@ namespace Client
 
         public void RevokeCertificate(X509Certificate2 certificate)
         {
-
             proxy.RevokeCertificate(certificate);
-
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Client
     {
         //static List<WCFClientServer> serverList;
         internal static WCFClientServer myChannel;
-        static WCFClient cmsClient; //connection to CMS
+        static CMSClient cmsClient; //connection to CMS
         
         static void Main(string[] args)
         {
@@ -62,12 +62,13 @@ namespace Client
             int option = 0;
             do
             {
-                Console.WriteLine("1. Generate Certificate");
-                Console.WriteLine("2. Add rights");
-                Console.WriteLine("3. Connect to server via certificate AUTH");
-                Console.WriteLine("4. Revoke certificate");
-                Console.WriteLine("5. Ping server");
-                Console.WriteLine("6. EXIT");
+                Console.WriteLine("1. Generate Certificate (with private key)");
+                Console.WriteLine("2. Generate Certificate (without private key)");
+                Console.WriteLine("3. Add rights");
+                Console.WriteLine("4. Connect to server via certificate AUTH");
+                Console.WriteLine("5. Revoke certificate");
+                Console.WriteLine("6. Ping server");
+                Console.WriteLine("7. EXIT");
                 int.TryParse(Console.ReadLine(),out option);
 
                 switch (option)
@@ -78,28 +79,33 @@ namespace Client
                         cmsClient.GenerateCertificate(root);
                         break;
                     case 2:
-                        Helper.ProvideCertRight(WindowsIdentity.GetCurrent().Name);
+                        Console.WriteLine("Choose root: ");
+                        string root2 = Console.ReadLine();
+                        cmsClient.GenerateCertificateWithoutPVK(root2);
                         break;
                     case 3:
+                        Helper.ProvideCertRight(WindowsIdentity.GetCurrent().Name);
+                        break;
+                    case 4:
                          myChannel = ConnectToServerViaCert();
                         //ConnectToServerViaCert();
                         break;
-                    case 4:
+                    case 5:
                         RevokeCertificate();
                         break;
-                    case 5:
+                    case 6:
                         PingServer(myChannel); //u novom threadu mozda bolje
                         break;
-                    case 6: //exit program
+                    case 7: //exit program
                         break;
                     default:
                         Console.WriteLine("Invalid input");
                         break;
                 }
-            } while (option != 6);
+            } while (option != 7);
         }
 
-        private static WCFClient ConnectToCMS()
+        private static CMSClient ConnectToCMS()
         {
             try
             {
@@ -107,7 +113,7 @@ namespace Client
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
                 var callbackInstance = new ClientCallback();
-                WCFClient proxy = new WCFClient(callbackInstance, binding, address);
+                CMSClient proxy = new CMSClient(callbackInstance, binding, address);
                 proxy.RegisterClient();
 
                 return proxy;
@@ -137,13 +143,7 @@ namespace Client
 
                 proxy.TestCommunication();
                 Console.WriteLine("TestCommunication() with server successful.");
-                // proxy.Credentials.ServiceCertificate
-               // myChannel = proxy;
 
-                //serverList.Add(proxy); //add to connected server list
-                                       // Console.ReadLine();
-
-               // PingServer(proxy);
                 return proxy;
 
             }
@@ -162,7 +162,7 @@ namespace Client
             {
                 while (true)
                 {
-                    Thread.Sleep(r.Next(8, 15) * 1000); //sleep 1-10s
+                    Thread.Sleep(r.Next(1, 10) * 1000); //sleep 1-10s
 
                     proxy.PingServer(DateTime.Now);
                 }
@@ -176,18 +176,6 @@ namespace Client
 
         public static void closeConnection(string hostname)
         {
-            //foreach (var item in serverList)
-            //{
-            //    //var v = OperationContext.Current.Host.Credentials.ServiceCertificate.Certificate;
-            //    var p = item.Endpoint.Address.Identity.IdentityClaim.Resource as X509Certificate2;
-            //    //X509Certificate2 x = ((X509CertificateClaimSet)
-            //    //    OperationContext.Current.ServiceSecurityContext.AuthorizationContext.ClaimSets[0]).X509Certificate;
-            //    var x = Helper.ExtractCommonNameFromCertificate(p);
-            //    if (hostname ==  Helper.ExtractCommonNameFromCertificate(item.Credentials.ServiceCertificate.DefaultCertificate))
-            //    {
-            //        item.Close();
-            //    }
-            //}
             if (myChannel.State == CommunicationState.Opened)
                 myChannel.Close();
         }
@@ -205,10 +193,8 @@ namespace Client
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
                 var callbackInstance = new ClientCallback();
-                //using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
-                //{
-                    cmsClient.RevokeCertificate(certificate);
-                    Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
+                cmsClient.RevokeCertificate(certificate);
+                Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
                 //}
                 //remove it from installed certificates
                 // CertManager.DeleteCertificateFromPersonal(certificate);

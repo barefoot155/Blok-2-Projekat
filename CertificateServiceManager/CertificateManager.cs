@@ -23,7 +23,7 @@ namespace CertificateServiceManager
         {
         }
 
-        public X509Certificate2 GenerateCertificate(string root)
+        public void GenerateCertificate(string root)
         {
             Process p = new Process();
             string path = (AppDomain.CurrentDomain.BaseDirectory + @"\makecert.exe");
@@ -41,11 +41,10 @@ namespace CertificateServiceManager
             }
             catch(Exception e)
             {
-                message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
+                message = String.Format("Certificate cannot be generated to {0}.Error: {1}", userName, e.Message);
                 EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
-                //CaptureEvent(message, evntTypeFailure);
                 EventLogManager.WriteEntryCMS(message, evntTypeFailure);
-                return null;
+                return;
             }
             p.WaitForExit();
             p.Dispose();
@@ -54,7 +53,9 @@ namespace CertificateServiceManager
             //create .pfx file
             Process p2 = new Process();
             path = (AppDomain.CurrentDomain.BaseDirectory + @"\pvk2pfx.exe");
-            arguments = string.Format("/pvk {0}.pvk /pi 123 /spc {0}.cer /pfx {0}.pfx", userName);
+            //Console.WriteLine("Enter private key: ");
+            //string pvk = Console.ReadLine();
+            arguments = string.Format("/pvk {0}.pvk /pi {1} /spc {0}.cer /pfx {0}.pfx", userName, "123");
             info = new ProcessStartInfo(path, arguments);
             p2.StartInfo = info;
             try
@@ -63,38 +64,48 @@ namespace CertificateServiceManager
             }
             catch(Exception e)
             {
-                message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
+                message = String.Format("Certificate cannot be generated to {0}.Error: {1}", userName, e.Message);
                 EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
-                //CaptureEvent(message, evntTypeFailure);
                 EventLogManager.WriteEntryCMS(message, evntTypeFailure);
-                return null;
+                return;
             }
             p2.WaitForExit();
             p2.Dispose();
 
             message = String.Format("Certificate generated to {0}.", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name);
             EventLogEntryType evntTypeSuccess = EventLogEntryType.SuccessAudit;
-            //CaptureEvent(message, evntTypeSuccess);
             EventLogManager.WriteEntryCMS(message, evntTypeSuccess);
 
-            /// try-catch necessary if either the speficied file doesn't exist or password is incorrect
+            Replicate(userName, "123");
+        }
+
+        public void GenerateCertificateWithoutPVK(string root)
+        {
+            Process p = new Process();
+            string path = (AppDomain.CurrentDomain.BaseDirectory + @"\makecert.exe");
+            string userName = Thread.CurrentPrincipal.Identity.Name.Split('\\')[1];
+
+            //get groups from windowsIdentity.Groups
+            string groups = GetUserGroups((Thread.CurrentPrincipal.Identity as WindowsIdentity));
+
+            string arguments = string.Format("-iv {1}.pvk -n \"CN = {0},OU={2}\" -ic {1}.cer {0}.cer -sr localmachine -ss My -sky exchange", userName, root, groups);
+            ProcessStartInfo info = new ProcessStartInfo(path, arguments);
+            p.StartInfo = info;
             try
             {
-                X509Certificate2 certificate = new X509Certificate2(userName + ".cer", "123");
-                NetTcpBinding binding = new NetTcpBinding();
-                InitializeWindowsAuthentication(binding);
-                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:10100/BackupData"));
-                using (WCFBackupClient proxy = new WCFBackupClient(binding, address))
-                {
-                    proxy.ReplicateCertificate(certificate.Subject + ", thumbprint: " + certificate.Thumbprint);
-                }
+                p.Start();
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error while trying to replicate certificate {0}. ERROR = {1}", userName, e.Message);
+                message = String.Format("Certificate cannot be generated to {0}.Error: {1}", userName, e.Message);
+                EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
+                EventLogManager.WriteEntryCMS(message, evntTypeFailure);
+                return;
             }
+            p.WaitForExit();
+            p.Dispose();
 
-            return null;
+            Replicate(userName, "");
         }
 
         private void InitializeWindowsAuthentication(NetTcpBinding binding)
@@ -120,9 +131,7 @@ namespace CertificateServiceManager
                         groups += "_" + name;
                     else
                         groups = name;
-                    
                 }
-
             }
 
             return groups;
@@ -201,6 +210,36 @@ namespace CertificateServiceManager
             ICertificateCallback callback = OperationContext.Current.GetCallbackChannel<ICertificateCallback>();
             if (!clients.Contains(callback))
                 clients.Add(callback);
+        }
+
+        /// <summary>
+        /// Replicates generated certificate 
+        /// </summary>
+        /// <param name="userName">Certificate file name</param>
+        /// <param name="password">Password for .pvk file</param>
+        private void Replicate(string userName, string password)
+        {
+            /// try-catch necessary if either the speficied file doesn't exist or password is incorrect
+            try
+            {
+                X509Certificate2 certificate;
+                if (password == "")
+                    certificate = new X509Certificate2(userName + ".cer");
+                else
+                    certificate = new X509Certificate2(userName + ".cer", password);
+
+                NetTcpBinding binding = new NetTcpBinding();
+                InitializeWindowsAuthentication(binding);
+                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:10100/BackupData"));
+                using (WCFBackupClient proxy = new WCFBackupClient(binding, address))
+                {
+                    proxy.ReplicateCertificate(certificate.Subject + ", thumbprint: " + certificate.Thumbprint);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error while trying to replicate certificate {0}. ERROR = {1}", userName, e.Message);
+            }
         }
     }
 }

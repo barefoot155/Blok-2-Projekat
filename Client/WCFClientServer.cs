@@ -38,18 +38,6 @@ namespace Client
             }
         }
 
-        public void SendMessage(string msg)
-        {
-            try
-            {
-                proxy.SendMessage(msg);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception: " + e.Message);
-            }
-        }
-
         public void TestCommunication()
         {
             try

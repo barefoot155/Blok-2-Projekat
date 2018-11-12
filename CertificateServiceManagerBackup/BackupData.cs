@@ -12,13 +12,17 @@ namespace CertificateServiceManagerBackup
     {
         //public List<string> RevocationList = new List<string>();
         //public List<string> CertificatesList = new List<string>();
+        static readonly object dummy = new object();
 
         public void ReplicateCertificate(string cert)
         {
             //CertificatesList.Add(cert);
             using (StreamWriter sw = new StreamWriter("CertListBackup.txt", true))
             {
-                sw.WriteLine(cert);
+                lock (dummy)
+                {
+                    sw.WriteLine(cert);
+                }
             }
             Console.WriteLine("Data replicated...");
         }
@@ -28,7 +32,10 @@ namespace CertificateServiceManagerBackup
             //RevocationList.Add(cert);
             using (StreamWriter sw = new StreamWriter("RevocationListBackup.txt", true))
             {
-                sw.WriteLine(cert);
+                lock (dummy)
+                {
+                    sw.WriteLine(cert);
+                }
             }
             Console.WriteLine("Data replicated...");
         }

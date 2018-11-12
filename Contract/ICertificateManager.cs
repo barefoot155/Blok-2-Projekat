@@ -13,7 +13,9 @@ namespace Contract
     public interface ICertificateManager
     {
         [OperationContract]
-        X509Certificate2 GenerateCertificate(string root);
+        void GenerateCertificate(string root);
+        [OperationContract]
+        void GenerateCertificateWithoutPVK(string root);
 
         [OperationContract]
         [FaultContract(typeof(SecurityException))]

@@ -13,7 +13,7 @@ namespace Server
     class Program
     {
         static WCFService myHost; //host service for my Clients
-        static WCFClient cmsClient; //connection to CMS
+        static CMSClient cmsClient; //connection to CMS
 
         internal static List<IDisconnectCallback> myClients = new List<IDisconnectCallback>(); //list of servers clients
         static void Main(string[] args)
@@ -55,11 +55,12 @@ namespace Server
             int option = 0;
             do
             {
-                Console.WriteLine("1. Generate Certificate from CA");
-                Console.WriteLine("2. Add rights to certificate");
-                Console.WriteLine("3. Host Server with certificate AUTH");
-                Console.WriteLine("4. Revoke certificate");
-                Console.WriteLine("5. EXIT");
+                Console.WriteLine("1. Generate Certificate from CA (with private key)");
+                Console.WriteLine("2. Generate Certificate from CA (without private key)");
+                Console.WriteLine("3. Add rights to certificate");
+                Console.WriteLine("4. Host Server with certificate AUTH");
+                Console.WriteLine("5. Revoke certificate");
+                Console.WriteLine("6. EXIT");
                 int.TryParse(Console.ReadLine(),out option);
 
                 switch (option)
@@ -70,21 +71,26 @@ namespace Server
                         cmsClient.GenerateCertificate(root);
                         break;
                     case 2:
-                        Helper.ProvideCertRight(WindowsIdentity.GetCurrent().Name);
+                        Console.WriteLine("Choose root: ");
+                        string root2 = Console.ReadLine();
+                        cmsClient.GenerateCertificateWithoutPVK(root2);
                         break;
                     case 3:
-                        HostServer();
+                        Helper.ProvideCertRight(WindowsIdentity.GetCurrent().Name);
                         break;
                     case 4:
+                        HostServer();
+                        break;
+                    case 5:
                         RevokeCertificate();
                         break;
-                    case 5: //exit program
+                    case 6: //exit program
                         break;
                     default:
                         Console.WriteLine("Invalid input");
                         break;
                 }
-            } while (option != 5);
+            } while (option != 6);
         }
 
         public static void CloseServerConnection(string serverName)
@@ -93,7 +99,7 @@ namespace Server
                 myHost.CloseServer();
         }
 
-        private static WCFClient ConnectToCMS()
+        private static CMSClient ConnectToCMS()
         {
             try
             {
@@ -102,10 +108,9 @@ namespace Server
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
                 var callbackInstance = new ServerCallback();
 
-                WCFClient proxy = new WCFClient(callbackInstance, binding, address);
+                CMSClient proxy = new CMSClient(callbackInstance, binding, address);
                 proxy.RegisterClient();
-                
-                //proxy.GenerateCertificate(root);
+
                 return proxy;
             }
             catch (Exception ex)
@@ -149,10 +154,8 @@ namespace Server
                 InitializeWindowsAuthentication(binding);
                 EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
                 var callbackInstance = new ServerCallback();
-                //using (WCFClient proxy = new WCFClient(callbackInstance, binding, address))
-                //{
-                    cmsClient.RevokeCertificate(certificate);
-                    Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
+                cmsClient.RevokeCertificate(certificate);
+                Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
                 //remove it from installed certificates
                 //CertManager.DeleteCertificateFromPersonal(certificate);
 
