@@ -16,6 +16,8 @@ using System.Timers;
 
 namespace Server
 {
+    public enum IDServerType { ClientConnected = 0, ClientDisconnect}
+
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.PerSession, ConcurrencyMode = ConcurrencyMode.Reentrant)]
     public class ServiceImplementation : IWCFContracts
     {
@@ -28,7 +30,7 @@ namespace Server
             message = String.Format("Client {0} established connection with server.", ServiceSecurityContext.Current.PrimaryIdentity.Name);
             EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
 
-            EventLogManager.WriteEntryServer(message, evntType);
+            EventLogManager.WriteEntryServer(message, evntType, Convert.ToInt32(IDServerType.ClientConnected));
         }
 
         /// <summary>
@@ -66,7 +68,7 @@ namespace Server
         {
             message = String.Format("Client {0} disconnect from server.", clientIP);
             EventLogEntryType evntType = EventLogEntryType.SuccessAudit;
-            EventLogManager.WriteEntryServer(message, evntType);
+            EventLogManager.WriteEntryServer(message, evntType, Convert.ToInt32(IDServerType.ClientDisconnect));
 
             //send disconnect
             client.DisconnectClient("close");
@@ -91,7 +93,7 @@ namespace Server
                 string subjectName = clientCert.SubjectName.Name;
                 string OU = subjectName.Split(',')[1];
 
-                if (OU.Contains("RegionWest") || OU.Contains("RegionEast") || OU.Contains("RegionNorth") || OU.Contains("RegionSouth"))
+                if (OU.Contains("RegionWest") || OU.Contains("RegionEast") || OU.Contains("RegionNorth") || OU.Contains("RegionSouth") || OU.Contains("Users"))
                     return true;
 
                 return false;

@@ -54,14 +54,14 @@ namespace Contract
             generateServerLog.Log = logName;
         }
 
-        public static void WriteEntryCMS(string message, EventLogEntryType evntType)
+        public static void WriteEntryCMS(string message, EventLogEntryType evntType, int eventID)
         {
-            generateCertLog.WriteEntry(message, evntType);
+            generateCertLog.WriteEntry(message, evntType, eventID);
         }
 
-        public static void WriteEntryServer(string message, EventLogEntryType evntType)
+        public static void WriteEntryServer(string message, EventLogEntryType evntType, int eventID)
         {
-            generateServerLog.WriteEntry(message, evntType);
+            generateServerLog.WriteEntry(message, evntType, eventID);
         }
     }
 }

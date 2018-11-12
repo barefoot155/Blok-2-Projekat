@@ -14,8 +14,13 @@ using System.Threading.Tasks;
 
 namespace CertificateServiceManager
 {
+    public enum  IDType { GenerateSuccess = 0, RevokeSuccess, ReplicateSuccess, GenerateFailure, RevokeFailure, ReplicateFailure};
+
     public class RootCert
     {
+        private String message = String.Empty;
+        private EventLogEntryType evntType;
+       
         public void createRootCertificate(string root)
         {
             if (File.Exists(root + ".cer"))
@@ -35,12 +40,14 @@ namespace CertificateServiceManager
             }
             catch (Exception e)
             {
-                string message = String.Format("Certificate cannot be generated to {0}.Error: {1}", (Thread.CurrentPrincipal.Identity as WindowsIdentity).Name, e.Message);
-                EventLogEntryType evntTypeFailure = EventLogEntryType.FailureAudit;
-                EventLogManager.WriteEntryCMS(message, evntTypeFailure);
+                message = String.Format("Root certificate {0} cannot be generated.Error: {1}", root, e.Message);
+                evntType = EventLogEntryType.FailureAudit;
+                EventLogManager.WriteEntryCMS(message, evntType, Convert.ToInt32(IDType.GenerateFailure));
                 return;
             }
-
+            message = String.Format("Root certificate {0} generated.", root);
+            evntType = EventLogEntryType.SuccessAudit;
+            EventLogManager.WriteEntryCMS(message, evntType, Convert.ToInt32(IDType.GenerateSuccess));
             p.WaitForExit();
             p.Dispose();
 
@@ -55,11 +62,17 @@ namespace CertificateServiceManager
                 EndpointAddress address = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("BackUp")));
                 using (WCFBackupClient proxy = new WCFBackupClient(binding, address))
                 {
+                    message = String.Format("Root certificate {0} successfully replicated.", root);
+                    evntType = EventLogEntryType.SuccessAudit;
+                    EventLogManager.WriteEntryCMS(message, evntType, Convert.ToInt32(IDType.ReplicateSuccess));
                     proxy.ReplicateCertificate(certificate.Subject + ", thumbprint: " + certificate.Thumbprint);
                 }
             }
             catch (Exception e)
             {
+                message = String.Format("Root certificate {0} failed to replicate.Error: {1}", root, e.Message);
+                evntType = EventLogEntryType.FailureAudit;
+                EventLogManager.WriteEntryCMS(message, evntType, Convert.ToInt32(IDType.ReplicateFailure));
                 Console.WriteLine("Error while trying to replicate certificate {0}. ERROR = {1}", root, e.Message);
             }
         }
