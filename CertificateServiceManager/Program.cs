@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.ServiceModel;
 using Contract;
 using System.ServiceModel.Description;
+using System.Configuration;
 
 namespace CertificateServiceManager
 {
@@ -43,7 +44,7 @@ namespace CertificateServiceManager
 
         public static bool ServerHosting(ServiceHost host, NetTcpBinding binding)
         {
-            string address = "net.tcp://localhost:9999/CertificateManager";            
+            string address = ConfigurationSettings.AppSettings.Get("CMShost");
             host.AddServiceEndpoint(typeof(ICertificateManager), binding, address);
 
             host.Description.Behaviors.Remove(typeof(ServiceDebugBehavior));

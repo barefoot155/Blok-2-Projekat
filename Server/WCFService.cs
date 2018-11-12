@@ -10,6 +10,7 @@ using System.ServiceModel.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.ServiceModel.Description;
+using System.Configuration;
 
 namespace Server
 {
@@ -21,7 +22,7 @@ namespace Server
             NetTcpBinding binding = new NetTcpBinding();
             binding.Security.Transport.ClientCredentialType = TcpClientCredentialType.Certificate;
 
-            string address = "net.tcp://localhost:10000/WCFContracts";
+            string address = ConfigurationSettings.AppSettings.Get("ServerHost");
             host = new ServiceHost(typeof(ServiceImplementation));
             SpecifyAuditingBehavior(host);
             host.AddServiceEndpoint(typeof(IWCFContracts), binding, address);

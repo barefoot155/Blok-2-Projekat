@@ -1,6 +1,7 @@
 ﻿using Contract;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
@@ -105,7 +106,7 @@ namespace Server
             {
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
-                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
+                EndpointAddress address = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("CMSProxy")));
                 var callbackInstance = new ServerCallback();
 
                 CMSClient proxy = new CMSClient(callbackInstance, binding, address);
@@ -152,7 +153,7 @@ namespace Server
 
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
-                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
+                EndpointAddress address = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("CMSProxy")));
                 var callbackInstance = new ServerCallback();
                 cmsClient.RevokeCertificate(certificate);
                 Console.WriteLine("Certificate CN={0} successfully revoked!", myName);

@@ -1,6 +1,7 @@
 ﻿using Contract;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.ServiceModel;
 using System.ServiceModel.Description;
@@ -15,7 +16,7 @@ namespace CertificateServiceManagerBackup
         {
             NetTcpBinding binding = new NetTcpBinding();
             InitializeWindowsAuthentication(binding);
-            string address = "net.tcp://localhost:10100/BackupData";
+            string address = ConfigurationSettings.AppSettings.Get("BackUpHost");
 
             ServiceHost hostBackup = new ServiceHost(typeof(BackupData));
             hostBackup.AddServiceEndpoint(typeof(IBackupData), binding, address);

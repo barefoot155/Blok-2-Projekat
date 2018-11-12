@@ -1,6 +1,7 @@
 ﻿using Contract;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IdentityModel.Claims;
 using System.Linq;
@@ -111,7 +112,7 @@ namespace Client
             {
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
-                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
+                EndpointAddress address = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("CMSProxy")));
                 var callbackInstance = new ClientCallback();
                 CMSClient proxy = new CMSClient(callbackInstance, binding, address);
                 proxy.RegisterClient();
@@ -137,7 +138,7 @@ namespace Client
 
                 //gets server certificate from trustedPeople folder
                 X509Certificate2 servCert = CertManager.GetCertificateFromStorage(StoreName.TrustedPeople, StoreLocation.LocalMachine, expectedServer);
-                EndpointAddress addressServer = new EndpointAddress(new Uri("net.tcp://localhost:10000/WCFContracts"), new X509CertificateEndpointIdentity(servCert));
+                EndpointAddress addressServer = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("ServerProxy")), new X509CertificateEndpointIdentity(servCert));
                 var callbackInstance = new DisconnectCallback();
                 WCFClientServer proxy = new WCFClientServer(callbackInstance, bindingServer, addressServer);
 
@@ -191,7 +192,7 @@ namespace Client
 
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
-                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:9999/CertificateManager"));
+                EndpointAddress address = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("CMSProxy")));
                 var callbackInstance = new ClientCallback();
                 cmsClient.RevokeCertificate(certificate);
                 Console.WriteLine("Certificate CN={0} successfully revoked!", myName);

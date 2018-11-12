@@ -11,6 +11,7 @@ using System.Security.Principal;
 using System.Security;
 using System.IO;
 using System.ServiceModel;
+using System.Configuration;
 
 namespace CertificateServiceManager
 {
@@ -188,7 +189,7 @@ namespace CertificateServiceManager
             }
             NetTcpBinding binding = new NetTcpBinding();
             InitializeWindowsAuthentication(binding);
-            EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:10100/BackupData"));
+            EndpointAddress address = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("BackUp")));
             try
             {
                 using (WCFBackupClient proxy = new WCFBackupClient(binding, address))
@@ -230,7 +231,7 @@ namespace CertificateServiceManager
 
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
-                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:10100/BackupData"));
+                EndpointAddress address = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("BackUp")));
                 using (WCFBackupClient proxy = new WCFBackupClient(binding, address))
                 {
                     proxy.ReplicateCertificate(certificate.Subject + ", thumbprint: " + certificate.Thumbprint);
