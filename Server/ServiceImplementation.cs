@@ -48,6 +48,7 @@ namespace Server
             }
 
             X509Certificate2 clientCert = getClientCertificate();
+
             string commonName = Helper.ExtractCommonNameFromCertificate(clientCert);
             Logger.LogData(dt, commonName);
 

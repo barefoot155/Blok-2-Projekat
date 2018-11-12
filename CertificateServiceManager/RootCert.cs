@@ -1,6 +1,7 @@
 ﻿using Contract;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -51,7 +52,7 @@ namespace CertificateServiceManager
                 X509Certificate2 certificate = new X509Certificate2(root + ".cer");
                 NetTcpBinding binding = new NetTcpBinding();
                 InitializeWindowsAuthentication(binding);
-                EndpointAddress address = new EndpointAddress(new Uri("net.tcp://localhost:10100/BackupData"));
+                EndpointAddress address = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("BackUp")));
                 using (WCFBackupClient proxy = new WCFBackupClient(binding, address))
                 {
                     proxy.ReplicateCertificate(certificate.Subject + ", thumbprint: " + certificate.Thumbprint);
