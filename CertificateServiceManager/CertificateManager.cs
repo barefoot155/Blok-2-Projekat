@@ -155,7 +155,7 @@ namespace CertificateServiceManager
             AddToRevocationList(cert);
             DeleteLocalCertificate(cert);
             
-            clients.Remove(OperationContext.Current.GetCallbackChannel<ICertificateCallback>());
+            //clients.Remove(OperationContext.Current.GetCallbackChannel<ICertificateCallback>());
             NotifyAllClients(cert);
         }
 
