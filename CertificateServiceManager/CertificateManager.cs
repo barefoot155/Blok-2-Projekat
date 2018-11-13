@@ -153,7 +153,7 @@ namespace CertificateServiceManager
             EventLogManager.WriteEntryCMS(message, evntType, Convert.ToInt32(IDType.RevokeSuccess));
 
             AddToRevocationList(cert);
-            //DeleteLocalCertificate(cert);   //ZAKOMENTARISANO ZA SVRHE TESTIRANJA (da ne brise svaki put) -> otkomentarisati na kraju
+            DeleteLocalCertificate(cert);
             
             clients.Remove(OperationContext.Current.GetCallbackChannel<ICertificateCallback>());
             NotifyAllClients(cert);
