@@ -196,14 +196,12 @@ namespace Client
                 var callbackInstance = new ClientCallback();
                 cmsClient.RevokeCertificate(certificate);
                 Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
-                //}
-                //remove it from installed certificates
-                // CertManager.DeleteCertificateFromPersonal(certificate);
+                
 
-                //ZAKOMENTARISANO ZBOG LAKSEG TESTIRANJA -> OTKOMENTARISATI NA KRAJU             <----------------- OTKOMENTARISATI NA KRAJU
-            //    Console.WriteLine("Generating new certificate...");
-            //    Console.WriteLine("Enter root name: ");
-            //    cmsClient.GenerateCertificate(Console.ReadLine());
+                
+                Console.WriteLine("Generating new certificate...");
+                Console.WriteLine("Enter root name: ");
+                cmsClient.GenerateCertificate(Console.ReadLine());
             }
             catch (ArgumentNullException ex)
             {
