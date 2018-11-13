@@ -34,15 +34,6 @@ namespace Contract
 
             return null;
         }
-
-        public static void DeleteCertificateFromPersonal(X509Certificate2 cert)
-        {
-            X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
-            store.Open(OpenFlags.ReadWrite);
-            
-            store.Certificates.Remove(cert);
-
-            //ne brise iz CURRENTUSER peronal store-a, mozda nije ni potrebno za zadatak.
-        }
+        
     }
 }
