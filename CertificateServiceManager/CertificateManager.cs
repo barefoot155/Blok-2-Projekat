@@ -153,9 +153,7 @@ namespace CertificateServiceManager
             EventLogManager.WriteEntryCMS(message, evntType, Convert.ToInt32(IDType.RevokeSuccess));
 
             AddToRevocationList(cert);
-            DeleteLocalCertificate(cert);
-            
-            //clients.Remove(OperationContext.Current.GetCallbackChannel<ICertificateCallback>());
+            DeleteLocalCertificate(cert);           
             NotifyAllClients(cert);
         }
 

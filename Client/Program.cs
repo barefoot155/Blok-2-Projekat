@@ -197,11 +197,6 @@ namespace Client
                 cmsClient.RevokeCertificate(certificate);
                 Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
                 
-
-                
-                Console.WriteLine("Generating new certificate...");
-                Console.WriteLine("Enter root name: ");
-                cmsClient.GenerateCertificate(Console.ReadLine());
             }
             catch (ArgumentNullException ex)
             {

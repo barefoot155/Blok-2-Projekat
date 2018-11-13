@@ -156,17 +156,9 @@ namespace Server
                 EndpointAddress address = new EndpointAddress(new Uri(ConfigurationSettings.AppSettings.Get("CMSProxy")));
                 var callbackInstance = new ServerCallback();
                 cmsClient.RevokeCertificate(certificate);
+                
                 Console.WriteLine("Certificate CN={0} successfully revoked!", myName);
-                
-
-
-                
-                Console.WriteLine("Generating new certificate...");
-                Console.WriteLine("Enter root name: ");
-                cmsClient.GenerateCertificate(Console.ReadLine());                      
-                
-
-
+                                              
             }
             catch (Exception ex)
             {
