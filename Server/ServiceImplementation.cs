@@ -93,7 +93,7 @@ namespace Server
                 string subjectName = clientCert.SubjectName.Name;
                 string OU = subjectName.Split(',')[1];
 
-                if (OU.Contains("RegionWest") || OU.Contains("RegionEast") || OU.Contains("RegionNorth") || OU.Contains("RegionSouth") || OU.Contains("Users"))
+                if (OU.Contains("RegionWest") || OU.Contains("RegionEast") || OU.Contains("RegionNorth") || OU.Contains("RegionSouth"))
                     return true;
 
                 return false;

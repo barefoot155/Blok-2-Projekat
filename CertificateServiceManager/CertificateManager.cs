@@ -131,7 +131,7 @@ namespace CertificateServiceManager
                 var name = sid.Translate(typeof(NTAccount)).ToString();
                 if (name.Contains('\\'))
                     name = name.Split('\\')[1]; 
-                if (name == "RegionWest" || name == "RegionEast" || name == "RegionNorth" || name == "RegionSouth" || name == "Users")
+                if (name == "RegionWest" || name == "RegionEast" || name == "RegionNorth" || name == "RegionSouth")
                 {
                     if (groups != "")
                         groups += "_" + name;
